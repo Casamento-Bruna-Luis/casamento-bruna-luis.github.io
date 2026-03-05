@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nosso Casamento Medieval</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =============================================
+       VARIÁVEIS E RESET
+    ============================================= */
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c96a;
+      --gold-dark: #8b6914;
+      --silver: #b8c4cc;
+      --burgundy: #6b1a2a;
+      --burgundy-light: #8b2a3e;
+      --burgundy-dark: #4a0f1a;
+      --dark-brown: #2c1a0e;
+      --dark-brown-mid: #3d2410;
+      --dark-green: #1a3320;
+      --dark-green-mid: #254d30;
+      --parchment: #f5ead0;
+      --parchment-dark: #e8d5a8;
+      --text-light: #f0e6cc;
+      --text-gold: #d4a843;
+      --rose-dark: #8b3a3a;
+      --rose-light: #c85a5a;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      background-color: var(--dark-brown);
+      color: var(--text-light);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* =============================================
+       CANVAS DE NEVE (GLOBAL)
+    ============================================= */
+    #snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+
+    #snow-canvas.active {
+      opacity: 1;
+    }
+
+    /* =============================================
+       ORNAMENTOS DE ROSAS SVG
+    ============================================= */
+    .rose-ornament {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      opacity: 0.7;
+    }
+
+    .rose-ornament.large {
+      width: 60px;
+      height: 60px;
+      opacity: 0.8;
+    }
+
+    .rose-ornament.small {
+      width: 28px;
+      height: 28px;
+      opacity: 0.6;
+    }
+
+    /* =============================================
+       DIVISORES ORNAMENTADOS
+    ============================================= */
+    .ornament-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin: 2.5rem auto;
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .ornament-divider::before,
+    .ornament-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .ornament-divider-center {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* =============================================
+       SEÇÃO 1 — HERO / BOAS-VINDAS (MEDIEVAL)
+    ============================================= */
+    #section-hero {
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at center top, rgba(107,26,42,0.4) 0%, transparent 60%),
+        radial-gradient(ellipse at center bottom, rgba(26,51,32,0.5) 0%, transparent 60%),
+        linear-gradient(180deg, #1a0d06 0%, #2c1a0e 40%, #1e1208 100%);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px 80px;
+      overflow: hidden;
+    }
+
+    /* Textura de pergaminho */
+    #section-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* Bordas decorativas nos cantos */
+    #section-hero::after {
+      content: '';
+      position: absolute;
+      inset: 16px;
+      border: 2px solid rgba(201,168,76,0.3);
+      pointer-events: none;
+    }
+
+    .hero-corner {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      color: var(--gold);
+      opacity: 0.5;
+    }
+    .hero-corner.tl { top: 16px; left: 16px; }
+    .hero-corner.tr { top: 16px; right: 16px; transform: scaleX(-1); }
+    .hero-corner.bl { bottom: 16px; left: 16px; transform: scaleY(-1); }
+    .hero-corner.br { bottom: 16px; right: 16px; transform: scale(-1); }
+
+    .hero-crown-text {
+      font-size: 2.5rem;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(201,168,76,0.6);
+      margin-bottom: 1rem;
+      animation: glowPulse 3s ease-in-out infinite;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 4px;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 20px rgba(201,168,76,0.6), 0 0 40px rgba(201,168,76,0.2); }
+      50% { text-shadow: 0 0 30px rgba(201,168,76,0.9), 0 0 60px rgba(201,168,76,0.4); }
+    }
+
+    .hero-subtitle-top {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.8;
+      margin-bottom: 2rem;
+    }
+
+    .hero-greeting {
+      font-family: 'UnifrakturMaguntia', cursive;
+      font-size: clamp(2rem, 6vw, 4rem);
+      color: var(--gold-light);
+      text-align: center;
+      line-height: 1.2;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 0 0 30px rgba(201,168,76,0.3);
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-greeting .guest-name {
+      color: #fff;
+      display: block;
+      font-size: clamp(2.2rem, 7vw, 4.5rem);
+      text-shadow: 0 0 20px rgba(255,255,255,0.3), 2px 2px 8px rgba(0,0,0,0.9);
+    }
+
+    .hero-text {
+      font-family: 'Crimson Text', serif;
+      font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+      font-style: italic;
+      color: var(--parchment);
+      text-align: center;
+      max-width: 720px;
+      line-height: 2;
+      margin-top: 2rem;
+      opacity: 0.95;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-date {
+      margin-top: 3rem;
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      border: 2px solid rgba(201,168,76,0.5);
+      padding: 14px 36px;
+      position: relative;
+    }
+
+    .hero-date::before,
+    .hero-date::after {
+      content: '✦';
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold);
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+    }
+    .hero-date::before { left: -20px; }
+    .hero-date::after { right: -20px; }
+
+    /* =============================================
+       SEÇÃO 2 — MOLDURA DA FOTO
+    ============================================= */
+    #section-photo {
+      background: linear-gradient(180deg, #1e1208 0%, #2c1a0e 50%, #241508 100%);
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    #section-photo::before {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 60px;
+      background: radial-gradient(ellipse at center, rgba(201,168,76,0.3) 0%, transparent 70%);
+      filter: blur(30px);
+    }
+
+    .section-title {
+      font-family: 'UnifrakturMaguntia', cursive;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: var(--gold-light);
+      text-align: center;
+      margin-bottom: 0.3rem;
+      text-shadow: 0 0 20px rgba(201,168,76,0.3);
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      text-align: center;
+      margin-bottom: 3.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Moldura medieval da foto */
+    .photo-frame-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 0 auto;
+    }
+
+    .photo-frame {
+      width: clamp(300px, 75vw, 580px);
+      aspect-ratio: 3/4;
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* Moldura ornamentada com rosas */
+    .photo-frame-ornament {
+      position: absolute;
+      inset: -40px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .photo-inner {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(44,26,14,0.9), rgba(60,36,20,0.9));
+      border: 3px solid var(--gold);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 0 60px rgba(201,168,76,0.2);
+    }
+
+    .photo-inner::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(201,168,76,0.4);
+      pointer-events: none;
+    }
+
+    .photo-inner::after {
+      content: '';
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgba(201,168,76,0.2);
+      pointer-events: none;
+    }
+
+    .photo-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    .photo-inner img.loaded {
+      display: block;
+    }
+
+    .photo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .photo-placeholder-text {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.15rem;
+      color: var(--gold);
+      opacity: 0.7;
+      line-height: 1.8;
+    }
+
+    .photo-upload-btn {
+      margin-top: 12px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--dark-brown);
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+      border: none;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+
+    .photo-upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(201,168,76,0.4);
+    }
+
+    #photo-input {
+      display: none;
+    }
+
+    /* =============================================
+       SEÇÃO 3 — NOSSA HISTÓRIA
+    ============================================= */
+    #section-story {
+      background: linear-gradient(180deg, #241508 0%, #1a3320 60%, #152a1a 100%);
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    #section-story::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .story-container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(26,51,32,0.7);
+      border: 2px solid rgba(201,168,76,0.4);
+      padding: 50px 45px;
+      position: relative;
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.5), 0 0 40px rgba(201,168,76,0.1);
+    }
+
+    .story-container::before,
+    .story-container::after {
+      content: '❧';
+      position: absolute;
+      color: var(--gold);
+      font-size: 2rem;
+      opacity: 0.6;
+    }
+    .story-container::before { top: 16px; left: 20px; }
+    .story-container::after { bottom: 16px; right: 20px; }
+
+    .story-textarea {
+      width: 100%;
+      min-height: 240px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: vertical;
+      font-family: 'Crimson Text', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--parchment);
+      line-height: 2;
+      letter-spacing: 0.4px;
+    }
+
+    .story-textarea::placeholder {
+      color: rgba(240,230,204,0.3);
+      font-style: italic;
+    }
+
+    .story-hint {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.5;
+      margin-top: 1rem;
+      text-align: right;
+    }
+
+    /* =============================================
+       SEÇÃO 4 — VESTIMENTA
+    ============================================= */
+    #section-dress {
+      background: linear-gradient(180deg, #152a1a 0%, #1a3320 30%, #2c1a0e 100%);
+      padding: 100px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    #section-dress::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .dress-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+      max-width: 1000px;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .dress-card {
+      background: rgba(44,26,14,0.8);
+      border: 2px solid rgba(201,168,76,0.4);
+      padding: 36px 32px;
+      position: relative;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.4), 0 0 30px rgba(0,0,0,0.3);
+    }
+
+    .dress-card:hover {
+      border-color: rgba(201,168,76,0.7);
+      transform: translateY(-4px);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.4), 0 8px 40px rgba(201,168,76,0.2);
+    }
+
+    .dress-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    .dress-card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 16px;
+      margin-top: 8px;
+    }
+
+    .dress-card-text {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.1rem;
+      color: var(--parchment);
+      line-height: 1.9;
+      opacity: 0.95;
+    }
+
+    .dress-colors {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .color-chip {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      display: inline-block;
+      title: attr(data-color);
+    }
+
+    .dress-warning {
+      max-width: 1000px;
+      width: 100%;
+      margin-top: 36px;
+      background: rgba(107,26,42,0.4);
+      border: 2px solid rgba(107,26,42,0.7);
+      border-left: 5px solid var(--burgundy-light);
+      padding: 24px 32px;
+      font-family: 'Crimson Text', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--parchment);
+      line-height: 1.9;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    }
+
+    .dress-warning strong {
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+      letter-spacing: 1px;
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    /* =============================================
+       TRANSIÇÃO — SEPARADOR VISUAL
+    ============================================= */
+    #section-transition {
+      height: 140px;
+      background: linear-gradient(180deg, #2c1a0e 0%, #0d1a14 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .transition-text {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.5);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* =============================================
+       SEÇÃO 5 — LUA DE MEL / NEVE (CHILE)
+    ============================================= */
+    #section-honeymoon {
+      min-height: 100vh;
+      background: linear-gradient(180deg,
+        #0d1a14 0%,
+        #0a1520 15%,
+        #0d1e2e 35%,
+        #0f2035 55%,
+        #0a1520 75%,
+        #060e18 100%
+      );
+      padding: 100px 20px 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Montanhas nevadas decorativas */
+    .mountains-bg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 45%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .mountains-bg svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Estrelas no fundo */
+    .stars-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    .honeymoon-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #a8d4f0;
+      opacity: 0.8;
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .honeymoon-icon-text {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+      animation: float 4s ease-in-out infinite;
+      font-family: 'Cinzel', serif;
+      letter-spacing: 4px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .honeymoon-title {
+      font-family: 'UnifrakturMaguntia', cursive;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: #e8f4ff;
+      text-align: center;
+      line-height: 1.3;
+      text-shadow: 0 0 30px rgba(168,212,240,0.5), 2px 2px 8px rgba(0,0,0,0.8);
+      margin-bottom: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .honeymoon-subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      letter-spacing: 3px;
+      color: #a8d4f0;
+      text-align: center;
+      margin-top: -1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .honeymoon-text {
+      font-family: 'Crimson Text', serif;
+      font-size: clamp(1.05rem, 2.5vw, 1.3rem);
+      color: #d0e8f8;
+      text-align: center;
+      max-width: 750px;
+      line-height: 2;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 2.5rem;
+      letter-spacing: 0.4px;
+    }
+
+    /* Card de neve / Chile */
+    .snow-card {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(168,212,240,0.35);
+      backdrop-filter: blur(8px);
+      padding: 45px 50px;
+      max-width: 700px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+      margin-top: 1.5rem;
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.3), 0 0 40px rgba(168,212,240,0.1);
+    }
+
+    .snow-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(168,212,240,0.6), transparent);
+    }
+
+    .snow-card-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.9rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #a8d4f0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .snow-card-text {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.15rem;
+      color: #e0f0ff;
+      line-height: 2;
+      text-align: center;
+      margin-bottom: 30px;
+      letter-spacing: 0.3px;
+    }
+
+    /* PIX */
+    .pix-box {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(168,212,240,0.4);
+      padding: 24px 32px;
+      text-align: center;
+      margin-top: 12px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+    }
+
+    .pix-label {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #a8d4f0;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .pix-key {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.35rem;
+      color: #ffffff;
+      letter-spacing: 1px;
+      word-break: break-all;
+      cursor: pointer;
+      transition: color 0.3s;
+      position: relative;
+    }
+
+    .pix-key:hover {
+      color: #a8d4f0;
+    }
+
+    .pix-copy-btn {
+      margin-top: 16px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #0a1520;
+      background: linear-gradient(135deg, #a8d4f0, #7ab8e0, #5a9fd4);
+      border: none;
+      padding: 12px 28px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .pix-copy-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(168,212,240,0.3);
+    }
+
+    .pix-copy-btn.copied {
+      background: linear-gradient(135deg, #6dbf7e, #4aaa5e);
+      color: white;
+    }
+
+    /* Toast de confirmação */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(26,51,32,0.95);
+      border: 2px solid var(--gold);
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      padding: 14px 32px;
+      z-index: 10000;
+      transition: transform 0.4s ease;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* =============================================
+       RODAPÉ
+    ============================================= */
+    #section-footer {
+      background: #060e18;
+      padding: 50px 20px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-text {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(168,212,240,0.4);
+    }
+
+    .footer-hearts {
+      color: var(--burgundy-light);
+      font-size: 1.4rem;
+      margin: 14px 0;
+      letter-spacing: 8px;
+      font-family: 'Cinzel', serif;
+    }
+
+    /* =============================================
+       ANIMAÇÕES DE ENTRADA
+    ============================================= */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--dark-brown); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+
+    /* =============================================
+       RESPONSIVIDADE
+    ============================================= */
+    @media (max-width: 600px) {
+      .story-container { padding: 30px 24px; }
+      .snow-card { padding: 30px 24px; }
+      .dress-card { padding: 24px 20px; }
+      .photo-frame-wrapper { margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Canvas de neve (global) -->
+<canvas id="snow-canvas"></canvas>
+
+<!-- Toast de cópia -->
+<div class="toast" id="toast">Chave PIX copiada com sucesso</div>
+
+<!-- ================================================
+     SEÇÃO 1 — HERO / BOAS-VINDAS
+================================================ -->
+<section id="section-hero">
+
+  <!-- Cantos decorativos SVG -->
+  <svg class="hero-corner tl" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 50 L5 5 L50 5" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    <path d="M15 50 L15 15 L50 15" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <circle cx="5" cy="5" r="5" fill="currentColor"/>
+    <path d="M35 5 Q5 5 5 35" stroke="currentColor" stroke-width="2" fill="none" opacity="0.7"/>
+    <circle cx="35" cy="5" r="2.5" fill="currentColor" opacity="0.6"/>
+    <circle cx="5" cy="35" r="2.5" fill="currentColor" opacity="0.6"/>
+    <path d="M50 50 Q25 50 25 25" stroke="currentColor" stroke-width="1" fill="none" opacity="0.4"/>
+  </svg>
+  <svg class="hero-corner tr" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 50 L5 5 L50 5" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    <path d="M15 50 L15 15 L50 15" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <circle cx="5" cy="5" r="5" fill="currentColor"/>
+    <path d="M35 5 Q5 5 5 35" stroke="currentColor" stroke-width="2" fill="none" opacity="0.7"/>
+    <circle cx="35" cy="5" r="2.5" fill="currentColor" opacity="0.6"/>
+    <circle cx="5" cy="35" r="2.5" fill="currentColor" opacity="0.6"/>
+    <path d="M50 50 Q25 50 25 25" stroke="currentColor" stroke-width="1" fill="none" opacity="0.4"/>
+  </svg>
+  <svg class="hero-corner bl" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 50 L5 5 L50 5" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    <path d="M15 50 L15 15 L50 15" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <circle cx="5" cy="5" r="5" fill="currentColor"/>
+    <path d="M35 5 Q5 5 5 35" stroke="currentColor" stroke-width="2" fill="none" opacity="0.7"/>
+    <circle cx="35" cy="5" r="2.5" fill="currentColor" opacity="0.6"/>
+    <circle cx="5" cy="35" r="2.5" fill="currentColor" opacity="0.6"/>
+    <path d="M50 50 Q25 50 25 25" stroke="currentColor" stroke-width="1" fill="none" opacity="0.4"/>
+  </svg>
+  <svg class="hero-corner br" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5 50 L5 5 L50 5" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    <path d="M15 50 L15 15 L50 15" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.5"/>
+    <circle cx="5" cy="5" r="5" fill="currentColor"/>
+    <path d="M35 5 Q5 5 5 35" stroke="currentColor" stroke-width="2" fill="none" opacity="0.7"/>
+    <circle cx="35" cy="5" r="2.5" fill="currentColor" opacity="0.6"/>
+    <circle cx="5" cy="35" r="2.5" fill="currentColor" opacity="0.6"/>
+    <path d="M50 50 Q25 50 25 25" stroke="currentColor" stroke-width="1" fill="none" opacity="0.4"/>
+  </svg>
+
+  <div class="hero-crown-text">CONVITE REAL</div>
+  <p class="hero-subtitle-top">— Celebração Solene —</p>
+
+  <h1 class="hero-greeting fade-in">
+    Saudações,
+    <span class="guest-name" id="guest-name-display">Nobre Convidado</span>
+  </h1>
+
+  <p class="hero-text fade-in" style="transition-delay: 0.2s;">
+    É com imensa alegria e o coração transbordando de amor que vos convidamos a testemunhar
+    a união de duas almas que encontraram uma na outra o seu lar eterno.
+    Que este pergaminho vos guie pelos detalhes desta celebração — um dia que prometemos
+    ser tão memorável quanto os grandes banquetes das eras medievais.
+    Vosso lugar nesta festa já está reservado. Vinde, celebrai conosco.
+  </p>
+
+  <div class="hero-date fade-in" style="transition-delay: 0.4s;" id="wedding-date">
+    ✦ &nbsp; O Grande Dia &nbsp; ✦
+  </div>
+
+</section>
+
+<!-- ================================================
+     SEÇÃO 2 — FOTO DO CASAL
+================================================ -->
+<section id="section-photo">
+
+  <div class="ornament-divider fade-in">
+    <div class="ornament-divider-center">
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+      <svg class="rose-ornament" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="roseGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#c85a5a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#8b3a3a;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="8" fill="url(#roseGrad1)"/>
+        <circle cx="20" cy="12" r="5" fill="url(#roseGrad1)" opacity="0.8"/>
+        <circle cx="28" cy="16" r="5" fill="url(#roseGrad1)" opacity="0.8"/>
+        <circle cx="28" cy="24" r="5" fill="url(#roseGrad1)" opacity="0.8"/>
+        <circle cx="20" cy="28" r="5" fill="url(#roseGrad1)" opacity="0.8"/>
+        <circle cx="12" cy="24" r="5" fill="url(#roseGrad1)" opacity="0.8"/>
+        <circle cx="12" cy="16" r="5" fill="url(#roseGrad1)" opacity="0.8"/>
+        <path d="M20 35 Q18 38 20 40 Q22 38 20 35" fill="#2c5a2c" opacity="0.7"/>
+        <path d="M20 35 Q16 36 14 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+        <path d="M20 35 Q24 36 26 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+      </svg>
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+    </div>
+  </div>
+
+  <h2 class="section-title fade-in">Os Noivos</h2>
+  <p class="section-subtitle fade-in">— Unidos Para Sempre —</p>
+
+  <div class="photo-frame-wrapper fade-in">
+    <div class="photo-frame" onclick="document.getElementById('photo-input').click()">
+      <!-- Moldura ornamentada medieval -->
+      <svg class="photo-frame-ornament" viewBox="0 0 560 760" xmlns="http://www.w3.org/2000/svg">
+        <!-- Moldura externa principal -->
+        <rect x="2" y="2" width="556" height="756" stroke="#c9a84c" stroke-width="3" fill="none"/>
+        <rect x="10" y="10" width="540" height="740" stroke="#c9a84c" stroke-width="1" fill="none" opacity="0.6"/>
+        
+        <!-- Cantos ornamentados com rosas -->
+        <!-- Canto Superior Esquerdo -->
+        <g id="corner-tl">
+          <path d="M2 60 L2 2 L60 2" stroke="#c9a84c" stroke-width="4" fill="none"/>
+          <path d="M12 60 L12 12 L60 12" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <circle cx="2" cy="2" r="6" fill="#c9a84c"/>
+          <path d="M30 2 Q2 2 2 30" stroke="#e8c96a" stroke-width="2" fill="none" opacity="0.7"/>
+          <circle cx="30" cy="2" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="2" cy="30" r="3" fill="#c9a84c" opacity="0.7"/>
+          <!-- Rosa pequena no canto -->
+          <circle cx="40" cy="40" r="6" fill="#c85a5a" opacity="0.7"/>
+          <circle cx="40" cy="32" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="40" cy="48" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+        </g>
+
+        <!-- Canto Superior Direito -->
+        <g id="corner-tr" transform="translate(560, 0) scale(-1, 1)">
+          <path d="M2 60 L2 2 L60 2" stroke="#c9a84c" stroke-width="4" fill="none"/>
+          <path d="M12 60 L12 12 L60 12" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <circle cx="2" cy="2" r="6" fill="#c9a84c"/>
+          <path d="M30 2 Q2 2 2 30" stroke="#e8c96a" stroke-width="2" fill="none" opacity="0.7"/>
+          <circle cx="30" cy="2" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="2" cy="30" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="40" cy="40" r="6" fill="#c85a5a" opacity="0.7"/>
+          <circle cx="40" cy="32" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="40" cy="48" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+        </g>
+
+        <!-- Canto Inferior Esquerdo -->
+        <g id="corner-bl" transform="translate(0, 760) scale(1, -1)">
+          <path d="M2 60 L2 2 L60 2" stroke="#c9a84c" stroke-width="4" fill="none"/>
+          <path d="M12 60 L12 12 L60 12" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <circle cx="2" cy="2" r="6" fill="#c9a84c"/>
+          <path d="M30 2 Q2 2 2 30" stroke="#e8c96a" stroke-width="2" fill="none" opacity="0.7"/>
+          <circle cx="30" cy="2" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="2" cy="30" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="40" cy="40" r="6" fill="#c85a5a" opacity="0.7"/>
+          <circle cx="40" cy="32" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="40" cy="48" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+        </g>
+
+        <!-- Canto Inferior Direito -->
+        <g id="corner-br" transform="translate(560, 760) scale(-1, -1)">
+          <path d="M2 60 L2 2 L60 2" stroke="#c9a84c" stroke-width="4" fill="none"/>
+          <path d="M12 60 L12 12 L60 12" stroke="#c9a84c" stroke-width="1.5" fill="none" opacity="0.5"/>
+          <circle cx="2" cy="2" r="6" fill="#c9a84c"/>
+          <path d="M30 2 Q2 2 2 30" stroke="#e8c96a" stroke-width="2" fill="none" opacity="0.7"/>
+          <circle cx="30" cy="2" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="2" cy="30" r="3" fill="#c9a84c" opacity="0.7"/>
+          <circle cx="40" cy="40" r="6" fill="#c85a5a" opacity="0.7"/>
+          <circle cx="40" cy="32" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="46" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="40" cy="48" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="44" r="4" fill="#c85a5a" opacity="0.6"/>
+          <circle cx="34" cy="36" r="4" fill="#c85a5a" opacity="0.6"/>
+        </g>
+
+        <!-- Ornamentos laterais centrais -->
+        <path d="M2 380 L25 380" stroke="#c9a84c" stroke-width="2.5" opacity="0.7"/>
+        <circle cx="30" cy="380" r="5" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.6"/>
+        <path d="M558 380 L535 380" stroke="#c9a84c" stroke-width="2.5" opacity="0.7"/>
+        <circle cx="530" cy="380" r="5" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.6"/>
+
+        <!-- Ornamentos topo/base centrais -->
+        <path d="M280 2 L280 25" stroke="#c9a84c" stroke-width="2.5" opacity="0.7"/>
+        <circle cx="280" cy="30" r="5" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.6"/>
+        <path d="M280 758 L280 735" stroke="#c9a84c" stroke-width="2.5" opacity="0.7"/>
+        <circle cx="280" cy="730" r="5" fill="none" stroke="#c9a84c" stroke-width="2" opacity="0.6"/>
+      </svg>
+
+      <div class="photo-inner" id="photo-inner">
+        <div class="photo-placeholder" id="photo-placeholder">
+          <span class="photo-placeholder-text">Clique para inserir<br>a fotografia do casal</span>
+          <button class="photo-upload-btn" onclick="event.stopPropagation(); document.getElementById('photo-input').click()">
+            Escolher Imagem
+          </button>
+        </div>
+        <img id="couple-photo" src="" alt="Foto do casal" />
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="photo-input" accept="image/*" />
+
+  <div class="ornament-divider fade-in" style="margin-top: 3.5rem;">
+    <div class="ornament-divider-center">
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+      <svg class="rose-ornament" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="roseGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#c85a5a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#8b3a3a;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="8" fill="url(#roseGrad2)"/>
+        <circle cx="20" cy="12" r="5" fill="url(#roseGrad2)" opacity="0.8"/>
+        <circle cx="28" cy="16" r="5" fill="url(#roseGrad2)" opacity="0.8"/>
+        <circle cx="28" cy="24" r="5" fill="url(#roseGrad2)" opacity="0.8"/>
+        <circle cx="20" cy="28" r="5" fill="url(#roseGrad2)" opacity="0.8"/>
+        <circle cx="12" cy="24" r="5" fill="url(#roseGrad2)" opacity="0.8"/>
+        <circle cx="12" cy="16" r="5" fill="url(#roseGrad2)" opacity="0.8"/>
+        <path d="M20 35 Q18 38 20 40 Q22 38 20 35" fill="#2c5a2c" opacity="0.7"/>
+        <path d="M20 35 Q16 36 14 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+        <path d="M20 35 Q24 36 26 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+      </svg>
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================================================
+     SEÇÃO 3 — NOSSA HISTÓRIA
+================================================ -->
+<section id="section-story">
+
+  <h2 class="section-title fade-in">Nossa História</h2>
+  <p class="section-subtitle fade-in">— Dois Caminhos, Um Destino —</p>
+
+  <div class="story-container fade-in">
+    <textarea
+      class="story-textarea"
+      id="story-text"
+      placeholder="Escreva aqui a história de amor do casal... Como se conheceram? Qual foi o momento em que souberam que eram feitos um para o outro? Compartilhe com seus convidados os momentos que tornaram essa jornada tão especial..."
+      spellcheck="false"
+    ></textarea>
+    <p class="story-hint">Clique para editar</p>
+  </div>
+
+  <div class="ornament-divider fade-in">
+    <div class="ornament-divider-center">
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+      <svg class="rose-ornament" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="roseGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#c85a5a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#8b3a3a;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="8" fill="url(#roseGrad3)"/>
+        <circle cx="20" cy="12" r="5" fill="url(#roseGrad3)" opacity="0.8"/>
+        <circle cx="28" cy="16" r="5" fill="url(#roseGrad3)" opacity="0.8"/>
+        <circle cx="28" cy="24" r="5" fill="url(#roseGrad3)" opacity="0.8"/>
+        <circle cx="20" cy="28" r="5" fill="url(#roseGrad3)" opacity="0.8"/>
+        <circle cx="12" cy="24" r="5" fill="url(#roseGrad3)" opacity="0.8"/>
+        <circle cx="12" cy="16" r="5" fill="url(#roseGrad3)" opacity="0.8"/>
+        <path d="M20 35 Q18 38 20 40 Q22 38 20 35" fill="#2c5a2c" opacity="0.7"/>
+        <path d="M20 35 Q16 36 14 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+        <path d="M20 35 Q24 36 26 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+      </svg>
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================================================
+     SEÇÃO 4 — VESTIMENTA
+================================================ -->
+<section id="section-dress">
+
+  <h2 class="section-title fade-in">Traje dos Convidados</h2>
+  <p class="section-subtitle fade-in">— Vesti-vos com a Dignidade da Ocasião —</p>
+
+  <p class="hero-text fade-in" style="max-width: 750px; text-align: center; margin-bottom: 3rem;">
+    Para honrar a atmosfera deste dia tão especial, pedimos gentilmente que nossos nobres convidados
+    se vistam de acordo com o espírito medieval que permeia nossa celebração.
+    Não é necessário um traje de fantasia — basta elegância, sobriedade e as cores certas.
+  </p>
+
+  <div class="dress-grid">
+
+    <div class="dress-card fade-in">
+      <h3 class="dress-card-title">Para os Cavalheiros</h3>
+      <p class="dress-card-text">
+        Ternos ou blazers em tons escuros e terrosos. Camisas de linho ou algodão em cores neutras
+        são bem-vindas. Gravatas ou lenços de bolso em bordô, dourado ou verde escuro complementam
+        perfeitamente o visual. Calças em tons de marrom, preto ou carvão.
+      </p>
+      <div class="dress-colors">
+        <span class="color-chip" style="background:#2c1a0e;" title="Marrom Escuro"></span>
+        <span class="color-chip" style="background:#1a1a1a;" title="Preto"></span>
+        <span class="color-chip" style="background:#3d2d1a;" title="Marrom Médio"></span>
+        <span class="color-chip" style="background:#6b1a2a;" title="Bordô"></span>
+        <span class="color-chip" style="background:#1a3320;" title="Verde Escuro"></span>
+        <span class="color-chip" style="background:#c9a84c;" title="Dourado (acessório)"></span>
+      </div>
+    </div>
+
+    <div class="dress-card fade-in" style="transition-delay: 0.1s;">
+      <h3 class="dress-card-title">Para as Damas</h3>
+      <p class="dress-card-text">
+        Vestidos longos ou midi em tons sombrios e ricos — bordô, verde floresta, marrom, preto ou
+        vinho. Tecidos como veludo, cetim, renda e chiffon evocam a elegância medieval.
+        Acessórios em dourado ou prata, como tiaras discretas, brincos e colares, são muito bem-vindos.
+      </p>
+      <div class="dress-colors">
+        <span class="color-chip" style="background:#6b1a2a;" title="Bordô"></span>
+        <span class="color-chip" style="background:#1a3320;" title="Verde Floresta"></span>
+        <span class="color-chip" style="background:#3d2410;" title="Marrom"></span>
+        <span class="color-chip" style="background:#1a1a1a;" title="Preto"></span>
+        <span class="color-chip" style="background:#4a1a40;" title="Roxo Escuro"></span>
+        <span class="color-chip" style="background:#b8c4cc;" title="Prata (acessório)"></span>
+      </div>
+    </div>
+
+    <div class="dress-card fade-in" style="transition-delay: 0.2s;">
+      <h3 class="dress-card-title">Toque Medieval</h3>
+      <p class="dress-card-text">
+        Para quem quiser ir além: capas curtas, cintos de couro, broches ornamentados, luvas de renda,
+        coroas de flores secas ou tiara metálica. O segredo é o equilíbrio — elegante e evocativo,
+        sem parecer fantasia. Pense em "banquete real", não em "cosplay".
+      </p>
+      <div class="dress-colors">
+        <span class="color-chip" style="background:#8b6914;" title="Couro Dourado"></span>
+        <span class="color-chip" style="background:#5a3e28;" title="Couro Marrom"></span>
+        <span class="color-chip" style="background:#c9a84c;" title="Dourado"></span>
+        <span class="color-chip" style="background:#b8c4cc;" title="Prata"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dress-warning fade-in">
+    <strong>Evitar:</strong> Branco, creme ou tons muito claros (reservados aos noivos), roupas com estampas modernas,
+    cores neon ou pastéis, e trajes que possam ser confundidos com fantasias de carnaval.
+    A ideia é que todos juntos componham um cenário digno de um reino encantado.
+  </div>
+
+  <div class="ornament-divider fade-in">
+    <div class="ornament-divider-center">
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+      <svg class="rose-ornament" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="roseGrad4" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#c85a5a;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#8b3a3a;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="20" cy="20" r="8" fill="url(#roseGrad4)"/>
+        <circle cx="20" cy="12" r="5" fill="url(#roseGrad4)" opacity="0.8"/>
+        <circle cx="28" cy="16" r="5" fill="url(#roseGrad4)" opacity="0.8"/>
+        <circle cx="28" cy="24" r="5" fill="url(#roseGrad4)" opacity="0.8"/>
+        <circle cx="20" cy="28" r="5" fill="url(#roseGrad4)" opacity="0.8"/>
+        <circle cx="12" cy="24" r="5" fill="url(#roseGrad4)" opacity="0.8"/>
+        <circle cx="12" cy="16" r="5" fill="url(#roseGrad4)" opacity="0.8"/>
+        <path d="M20 35 Q18 38 20 40 Q22 38 20 35" fill="#2c5a2c" opacity="0.7"/>
+        <path d="M20 35 Q16 36 14 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+        <path d="M20 35 Q24 36 26 38" stroke="#2c5a2c" stroke-width="1" fill="none" opacity="0.6"/>
+      </svg>
+      <span style="color: var(--gold); font-size: 1.2rem;">✦</span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================================================
+     TRANSIÇÃO
+================================================ -->
+<div id="section-transition">
+  <span class="transition-text">Uma Jornada Além das Montanhas</span>
+</div>
+
+<!-- ================================================
+     SEÇÃO 5 — LUA DE MEL / NEVE
+================================================ -->
+<section id="section-honeymoon">
+
+  <!-- Estrelas -->
+  <div class="stars-bg" id="stars-bg"></div>
+
+  <!-- Montanhas nevadas -->
+  <div class="mountains-bg">
+    <svg viewBox="0 0 1440 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,400 200,120 400,280 600,80 800,220 1000,60 1200,200 1440,100 1440,400" fill="rgba(15,32,53,0.8)"/>
+      <polygon points="0,400 100,200 250,300 450,140 650,260 850,120 1050,240 1250,160 1440,220 1440,400" fill="rgba(10,21,32,0.9)"/>
+      <polygon points="600,80 560,130 640,130" fill="rgba(220,235,255,0.9)"/>
+      <polygon points="1000,60 955,115 1045,115" fill="rgba(220,235,255,0.9)"/>
+      <polygon points="200,120 165,165 235,165" fill="rgba(220,235,255,0.7)"/>
+      <polygon points="450,140 415,185 485,185" fill="rgba(220,235,255,0.8)"/>
+      <polygon points="850,120 815,165 885,165" fill="rgba(220,235,255,0.8)"/>
+      <rect x="0" y="370" width="1440" height="30" fill="rgba(200,220,255,0.15)"/>
+    </svg>
+  </div>
+
+  <p class="honeymoon-badge fade-in">— Lua de Mel —</p>
+  <div class="honeymoon-icon-text fade-in">MONTANHAS NEVADAS</div>
+
+  <h2 class="honeymoon-title fade-in">
+    Rumo ao Chile
+  </h2>
+  <p class="honeymoon-subtitle fade-in">Terra de Neve e Sonhos Realizados</p>
+
+  <p class="honeymoon-text fade-in">
+    Após anos sonhando juntos com o dia em que poderíamos ver a neve pela primeira vez,
+    decidimos que nossa lua de mel seria o momento perfeito para realizar esse sonho.
+    Partiremos para o Chile, onde as montanhas cobertas de neve nos aguardam como um
+    presente do universo — assim como vocês são um presente para nós.
+  </p>
+
+  <div class="snow-card fade-in">
+    <p class="snow-card-title">Um Pedido do Coração</p>
+    <p class="snow-card-text">
+      Se em vosso coração habita o desejo de nos presentear neste dia tão especial,
+      o maior presente que poderíamos receber é a realização deste sonho que carregamos há tanto tempo.
+      Cada contribuição nos aproxima das montanhas nevadas do Chile — onde, pela primeira vez,
+      sentiremos a neve entre os dedos e celebraremos o início da nossa vida a dois
+      da forma mais mágica que poderíamos imaginar.
+      <br><br>
+      Com amor e gratidão infinita, agradecemos de coração.
+    </p>
+
+    <div class="pix-box">
+      <span class="pix-label">Nossa Chave PIX</span>
+      <div class="pix-key" id="pix-key-display" onclick="copyPix()">
+        sua-chave-pix@email.com
+      </div>
+      <button class="pix-copy-btn" id="pix-copy-btn" onclick="copyPix()">
+        Copiar Chave PIX
+      </button>
+    </div>
+  </div>
+
+  <div class="ornament-divider fade-in" style="margin-top: 3.5rem;">
+    <div class="ornament-divider-center">
+      <span style="color: #a8d4f0; font-size: 1.2rem;">✦</span>
+      <span style="color: #a8d4f0; font-size: 1.2rem;">❄</span>
+      <span style="color: #a8d4f0; font-size: 1.2rem;">✦</span>
+    </div>
+  </div>
+
+  <p class="honeymoon-text fade-in" style="font-size: 1.1rem; margin-top: 0.5rem; opacity: 0.8;">
+    Dois corações, uma jornada — e a neve como testemunha do nosso amor.
+  </p>
+
+</section>
+
+<!-- ================================================
+     RODAPÉ
+================================================ -->
+<footer id="section-footer">
+  <p class="footer-hearts">✦ &nbsp; ✦ &nbsp; ✦</p>
+  <p class="footer-text">Com amor, os noivos — Que este dia seja eterno em vossas memórias</p>
+</footer>
+
+<!-- ================================================
+     JAVASCRIPT
+================================================ -->
+<script>
+  // ============================================
+  // 1. LEITURA DO NOME VIA QR CODE (URL PARAM)
+  // ============================================
+  (function readGuestName() {
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get('nome') || params.get('name') || params.get('convidado');
+    const display = document.getElementById('guest-name-display');
+    if (name && name.trim()) {
+      display.textContent = decodeURIComponent(name.trim());
+    }
+  })();
+
+  // ============================================
+  // 2. UPLOAD DE FOTO DO CASAL
+  // ============================================
+  const photoInput = document.getElementById('photo-input');
+  const couplePhoto = document.getElementById('couple-photo');
+  const photoPlaceholder = document.getElementById('photo-placeholder');
+
+  photoInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      couplePhoto.src = ev.target.result;
+      couplePhoto.classList.add('loaded');
+      photoPlaceholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ============================================
+  // 3. ANIMAÇÕES DE ENTRADA (INTERSECTION OBSERVER)
+  // ============================================
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+
+  fadeEls.forEach(el => observer.observe(el));
+
+  // ============================================
+  // 4. EFEITO DE NEVE (CANVAS)
+  // ============================================
+  const canvas = document.getElementById('snow-canvas');
+  const ctx = canvas.getContext('2d');
+  let snowflakes = [];
+  let snowActive = false;
+  let animFrame;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function createSnowflake() {
+    return {
+      x: Math.random() * canvas.width,
+      y: -10,
+      r: Math.random() * 4 + 1.5,
+      speed: Math.random() * 1.5 + 0.5,
+      wind: Math.random() * 0.8 - 0.4,
+      opacity: Math.random() * 0.6 + 0.3,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: Math.random() * 0.02 + 0.005,
+    };
+  }
+
+  function drawSnow() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    snowflakes.forEach(flake => {
+      ctx.beginPath();
+      ctx.arc(flake.x, flake.y, flake.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(220, 235, 255, ${flake.opacity})`;
+      ctx.fill();
+    });
+  }
+
+  function updateSnow() {
+    if (snowflakes.length < 180) {
+      for (let i = 0; i < 2; i++) {
+        snowflakes.push(createSnowflake());
+      }
+    }
+    snowflakes.forEach(flake => {
+      flake.wobble += flake.wobbleSpeed;
+      flake.x += flake.wind + Math.sin(flake.wobble) * 0.5;
+      flake.y += flake.speed;
+    });
+    snowflakes = snowflakes.filter(f => f.y < canvas.height + 20 && f.x > -20 && f.x < canvas.width + 20);
+  }
+
+  function animateSnow() {
+    updateSnow();
+    drawSnow();
+    animFrame = requestAnimationFrame(animateSnow);
+  }
+
+  function startSnow() {
+    if (snowActive) return;
+    snowActive = true;
+    canvas.classList.add('active');
+    animateSnow();
+  }
+
+  function stopSnow() {
+    if (!snowActive) return;
+    snowActive = false;
+    canvas.classList.remove('active');
+    cancelAnimationFrame(animFrame);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    snowflakes = [];
+  }
+
+  // ============================================
+  // 5. ATIVAR NEVE AO CHEGAR NA SEÇÃO HONEYMOON
+  // ============================================
+  const honeymoonSection = document.getElementById('section-honeymoon');
+  const transitionSection = document.getElementById('section-transition');
+
+  const snowObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        startSnow();
+      } else {
+        const transRect = transitionSection.getBoundingClientRect();
+        const honeyRect = honeymoonSection.getBoundingClientRect();
+        if (transRect.bottom < 0 && honeyRect.bottom < 0) {
+          stopSnow();
+        }
+        if (honeyRect.top > window.innerHeight) {
+          stopSnow();
+        }
+      }
+    });
+  }, { threshold: 0.05 });
+
+  snowObserver.observe(honeymoonSection);
+
+  // ============================================
+  // 6. COPIAR CHAVE PIX
+  // ============================================
+  function copyPix() {
+    const pixKey = document.getElementById('pix-key-display').textContent.trim();
+    const btn = document.getElementById('pix-copy-btn');
+    const toast = document.getElementById('toast');
+
+    navigator.clipboard.writeText(pixKey).then(() => {
+      btn.textContent = 'Copiado com Sucesso';
+      btn.classList.add('copied');
+      toast.classList.add('show');
+      setTimeout(() => {
+        btn.textContent = 'Copiar Chave PIX';
+        btn.classList.remove('copied');
+        toast.classList.remove('show');
+      }, 3000);
+    }).catch(() => {
+      const el = document.createElement('textarea');
+      el.value = pixKey;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      btn.textContent = 'Copiado!';
+      btn.classList.add('copied');
+      toast.classList.add('show');
+      setTimeout(() => {
+        btn.textContent = 'Copiar Chave PIX';
+        btn.classList.remove('copied');
+        toast.classList.remove('show');
+      }, 3000);
+    });
+  }
+
+  // ============================================
+  // 7. ESTRELAS ALEATÓRIAS NA SEÇÃO NEVE
+  // ============================================
+  (function createStars() {
+    const container = document.getElementById('stars-bg');
+    for (let i = 0; i < 80; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 2.5 + 0.5;
+      star.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${Math.random() * 100}%;
+        top: ${Math.random() * 70}%;
+        --dur: ${Math.random() * 3 + 2}s;
+        --delay: ${Math.random() * 4}s;
+      `;
+      container.appendChild(star);
+    }
+  })();
+
+  // ============================================
+  // 8. ANIMAÇÃO INICIAL DO HERO
+  // ============================================
+  window.addEventListener('load', () => {
+    document.querySelectorAll('#section-hero .fade-in').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), 300 + i * 200);
+    });
+  });
+</script>
+
+</body>
+</html>
