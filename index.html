@@ -301,10 +301,10 @@
 .frame-slot {
     position: absolute;
     /* Esses valores abaixo controlam o quanto a foto aparece no 'buraco' */
-    top: 12%;    
+    top: 8%;    
     left: 12%;   
     width: 76%;  
-    height: 72%; 
+    height: 84%; 
     z-index: 1; /* Valor menor para ficar atrás */
     overflow: hidden;
 }
@@ -549,7 +549,7 @@
         <div class="frame-slot">
           <div>
             <!-- <p>Insira aqui a vossa imagem</p> -->
-            <img src="medievalcasal.png">
+            <img src="foto-casal.jpg">
             <!-- <small>Substitua o atributo src da tag &lt;img&gt; acima pelo caminho da vossa foto</small> -->
           </div>
         </div>
@@ -1020,6 +1020,31 @@
       try { document.execCommand('copy'); } catch (e) { /* silencioso */ }
       document.body.removeChild(ta);
     }
+
+    var bgAudio = new Audio('Brotherhood - Simon Daum (Celtic Music).mp3');
+    bgAudio.loop = true; // Mantém a música em loop
+
+    // Lê o parâmetro 't' ou 'time' da URL (ex: sua-pagina.html?nome=Fulano&t=45.2)
+    var audioTime = params.get('t') || params.get('time') || 0;
+    
+    // Se existir um tempo na URL, avança a música para aquele exato segundo
+    if (audioTime) {
+      bgAudio.currentTime = parseFloat(audioTime);
+    }
+
+    // Tenta dar play automaticamente
+    bgAudio.play().catch(function(error) {
+      console.warn('Autoplay bloqueado. Aguardando interação do usuário para tocar a música.');
+      
+      // Fallback: Toca a música no primeiro clique/toque do usuário na tela
+      function startAudioOnInteract() {
+        bgAudio.play();
+        document.body.removeEventListener('click', startAudioOnInteract);
+        document.body.removeEventListener('touchstart', startAudioOnInteract);
+      }
+      document.body.addEventListener('click', startAudioOnInteract, { once: true });
+      document.body.addEventListener('touchstart', startAudioOnInteract, { once: true });
+    });
 
   })();
   </script>
