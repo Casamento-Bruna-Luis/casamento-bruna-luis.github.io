@@ -1075,14 +1075,16 @@
     }
 
     function removerListeners() {
-      ['click', 'touchstart', 'scroll', 'mousedown'].forEach(function(e) {
+      ['click', 'touchstart', 'touchend', 'scroll', 'mousedown'].forEach(function(e) {
         document.removeEventListener(e, iniciarMusica);
       });
     }
 
-    // Adiciona múltiplos gatilhos: qualquer toque, clique ou rolagem iniciará o som
-    ['click', 'touchstart', 'scroll', 'mousedown'].forEach(function(e) {
-      document.addEventListener(e, iniciarMusica, { once: true });
+    // Adiciona múltiplos gatilhos. Removemos o { once: true } para que, caso o navegador 
+    // bloqueie a primeira tentativa (comum ao iniciar o scroll), ele tente novamente 
+    // na próxima interação até obter sucesso.
+    ['click', 'touchstart', 'touchend', 'scroll', 'mousedown'].forEach(function(e) {
+      document.addEventListener(e, iniciarMusica);
     });
 
     // Tenta iniciar imediatamente (funciona se o navegador já tiver permissão)
