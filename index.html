@@ -1059,27 +1059,34 @@
     var bgAudio = new Audio('Brotherhood - Simon Daum (Celtic Music).mp3');
     bgAudio.loop = true; // Mantém a música em loop
 
-    // Lê o parâmetro 't' ou 'time' da URL (ex: sua-pagina.html?nome=Fulano&t=45.2)
     var audioTime = params.get('t') || params.get('time') || 0;
     
-    // Se existir um tempo na URL, avança a música para aquele exato segundo
-    if (audioTime) {
-      bgAudio.currentTime = parseFloat(audioTime);
+    // Garante que o tempo seja definido após o carregamento dos metadados
+    bgAudio.addEventListener('loadedmetadata', function() {
+      if (audioTime) bgAudio.currentTime = parseFloat(audioTime);
+    });
+
+    function iniciarMusica() {
+      bgAudio.play().then(function() {
+        removerListeners();
+      }).catch(function() {
+        // Falhou (bloqueio de autoplay), aguarda interação do usuário
+      });
     }
 
-    // Tenta dar play automaticamente
-    bgAudio.play().catch(function(error) {
-      console.warn('Autoplay bloqueado. Aguardando interação do usuário para tocar a música.');
-      
-      // Fallback: Toca a música no primeiro clique/toque do usuário na tela
-      function startAudioOnInteract() {
-        bgAudio.play();
-        document.body.removeEventListener('click', startAudioOnInteract);
-        document.body.removeEventListener('touchstart', startAudioOnInteract);
-      }
-      document.body.addEventListener('click', startAudioOnInteract, { once: true });
-      document.body.addEventListener('touchstart', startAudioOnInteract, { once: true });
+    function removerListeners() {
+      ['click', 'touchstart', 'scroll', 'mousedown'].forEach(function(e) {
+        document.removeEventListener(e, iniciarMusica);
+      });
+    }
+
+    // Adiciona múltiplos gatilhos: qualquer toque, clique ou rolagem iniciará o som
+    ['click', 'touchstart', 'scroll', 'mousedown'].forEach(function(e) {
+      document.addEventListener(e, iniciarMusica, { once: true });
     });
+
+    // Tenta iniciar imediatamente (funciona se o navegador já tiver permissão)
+    iniciarMusica();
 
   })();
   </script>
