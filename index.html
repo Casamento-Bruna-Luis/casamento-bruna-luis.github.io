@@ -613,7 +613,7 @@
           Como uma rosa que desabrocha ao primeiro raio de sol, o nosso laço cresceu enquanto enfrentávamos 
           juntos os desafios das academias de ensino, cruzando os portões de faculdades lado a lado, forjando 
           um elo mais resistente que o aço das espadas de outrora. Pelo caminho, nosso castelo foi preenchido 
-          pela alegria de pequenos guardiões de quatro patas: da saudosa Ravena, nossa primeira companheira, 
+          pela alegria de pequenos guardiões felinos: da saudosa Ravena, nossa primeira companheira, 
           ao querido Bon Jovi, e a nossa corte formada por Trinity, Neo, Gato, Bruce e Selina.
         </p>
         <p class="corpo">
@@ -825,14 +825,24 @@
   ══════════════════════════════════════ -->
   <section id="pix" class="sec bg-final" style="text-align:center;">
     <div class="wrap">
-      <h2 class="sec-title prata reveal">Chave Pix</h2>
+      <h2 class="sec-title prata reveal">Presente de Amor</h2>
       <p class="sec-sub prata reveal d1">Para aqueles que desejam contribuir com nossa jornada</p>
 
-      <div class="reveal d2">
+      <div class="reveal d2" style="margin-bottom: 2.5rem;">
         <div class="pix-caixa">
           <p class="pix-label">Chave Pix</p>
           <p class="pix-chave" id="pix-valor">brunab.bueno@hotmail.com</p>
           <button class="btn-pix" id="btn-copiar" onclick="copiarPix()">Copiar Chave</button>
+        </div>
+      </div>
+
+      <p class="sec-sub prata reveal d1">Ou se preferir, utilize o link de pagamento (disponível para parcelas de até 10x sem juros)</p>
+
+      <div class="reveal d2">
+        <div class="pix-caixa">
+          <p class="pix-label">Link de Pagamento</p>
+          <p class="pix-chave" id="link-valor">link.mercadopago.com.br/casamentobrunaeluis</p>
+          <button class="btn-pix" id="btn-copiar-link" onclick="copiarLink()">Copiar Link</button>
         </div>
       </div>
 
@@ -999,6 +1009,26 @@
     window.copiarPix = function () {
       var chave = document.getElementById('pix-valor').textContent;
       var btn   = document.getElementById('btn-copiar');
+
+      function feedback() {
+        btn.textContent = 'Copiado!';
+        setTimeout(function () { btn.textContent = 'Copiar Chave'; }, 2200);
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(chave).then(feedback).catch(function () {
+          fallbackCopy(chave);
+          feedback();
+        });
+      } else {
+        fallbackCopy(chave);
+        feedback();
+      }
+    };
+
+    window.copiarLink = function () {
+      var chave = document.getElementById('link-valor').textContent;
+      var btn   = document.getElementById('btn-copiar-link');
 
       function feedback() {
         btn.textContent = 'Copiado!';
